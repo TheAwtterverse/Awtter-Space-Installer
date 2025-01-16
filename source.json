@@ -1,0 +1,20 @@
+{
+    "name":"Awtter SDK",
+    "id":"com.killers0992.awttersdk",
+    "url":"https://TheAwtterverse.github.io/AwtterSDK/index.json",
+    "author":{
+        "email":"dubstep.dragon@dubby.dev",
+        "name":"Dubby",
+        "url":"https://dubby.dev"
+    },
+    "description":"Tool for managing content from AwtterSpace.",
+    "infoLink":{
+        "url":"https://github.com/dubstepdragon/AwtterSDK_dubby",
+        "text":"View on GitHub"
+    },
+    "bannerUrl":"https://github.com/dubstepdragon/AwtterSDK_dubby/blob/main/Website/banner.png",
+    "githubRepos":[
+        "TheAwtterverse/AwtterSDK",
+        "TheAwtterverse/AwtterMerger"
+    ]
+}

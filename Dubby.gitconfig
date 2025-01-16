@@ -1,0 +1,8 @@
+[credential]
+    username = dubstepdragon
+[user]
+    name = Dubby
+    email = reynoldsjt2.4@gmail.com
+	
+[core]
+    sshCommand = ssh -i ~/.ssh/Dubby -F /dev/null

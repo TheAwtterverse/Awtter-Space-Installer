@@ -2,6 +2,9 @@ name: Build Release
 
 on: 
   workflow_dispatch:
+  push:
+    branches: main
+    paths: source.json
 
 jobs:
 
@@ -64,7 +67,7 @@ jobs:
       
       # Make a UnityPackage version of the Package for release
       - name: Create UnityPackage
-        uses: pCYSl5EDgo/create-unitypackage@cfcd3cf0391a5ef1306342794866a9897c32af0b
+        uses: pCYSl5EDgo/create-unitypackage@master
         with:
           package-path: ${{ env.unityPackage }}
           include-files: metaList
