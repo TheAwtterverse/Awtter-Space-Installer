@@ -7,7 +7,8 @@ namespace AwtterSDK.Editor
 {
     internal static class TokenCache
     {
-        static string _token;
+        private static string _token;
+
         internal static string Token
         {
             get
@@ -26,7 +27,7 @@ namespace AwtterSDK.Editor
             }
         }
 
-        static void SaveToken(string rawToken)
+        private static void SaveToken(string rawToken)
         {
             if (string.IsNullOrEmpty(rawToken))
             {
@@ -35,7 +36,7 @@ namespace AwtterSDK.Editor
                 return;
             }
 
-            AesCryptoServiceProvider crypto = new AesCryptoServiceProvider();
+            var crypto = new AesCryptoServiceProvider();
             crypto.KeySize = 128;
             crypto.BlockSize = 128;
             crypto.GenerateKey();
@@ -44,35 +45,35 @@ namespace AwtterSDK.Editor
             EditorPrefs.SetString("AwSdkToken", AesOperation.EncryptString(crypto.Key, rawToken));
         }
 
-        static void ReadToken()
+        private static void ReadToken()
         {
-            string key = EditorPrefs.GetString("AwSdkKey");
-            string token = EditorPrefs.GetString("AwSdkToken");
+            var key = EditorPrefs.GetString("AwSdkKey");
+            var token = EditorPrefs.GetString("AwSdkToken");
 
-            if (!String.IsNullOrEmpty(key) && !String.IsNullOrEmpty(token))
+            if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(token))
                 _token = AesOperation.DecryptString(Convert.FromBase64String(key), token);
         }
     }
 
-    static class AesOperation
+    internal static class AesOperation
     {
         public static string EncryptString(byte[] key, string plainText)
         {
-            byte[] iv = new byte[16];
+            var iv = new byte[16];
             byte[] array;
 
-            using (Aes aes = Aes.Create())
+            using (var aes = Aes.Create())
             {
                 aes.Key = key;
                 aes.IV = iv;
 
-                ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+                var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
 
-                using (MemoryStream memoryStream = new MemoryStream())
+                using (var memoryStream = new MemoryStream())
                 {
-                    using (CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, encryptor, CryptoStreamMode.Write))
+                    using (var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
                     {
-                        using (StreamWriter streamWriter = new StreamWriter((Stream)cryptoStream))
+                        using (var streamWriter = new StreamWriter(cryptoStream))
                         {
                             streamWriter.Write(plainText);
                         }
@@ -89,7 +90,7 @@ namespace AwtterSDK.Editor
         {
             if (string.IsNullOrEmpty(cipherText)) return string.Empty;
 
-            byte[] iv = new byte[16];
+            var iv = new byte[16];
             byte[] buffer = null;
             try
             {
@@ -100,17 +101,17 @@ namespace AwtterSDK.Editor
                 return string.Empty;
             }
 
-            using (Aes aes = Aes.Create())
+            using (var aes = Aes.Create())
             {
                 aes.Key = key;
                 aes.IV = iv;
-                ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+                var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
 
-                using (MemoryStream memoryStream = new MemoryStream(buffer))
+                using (var memoryStream = new MemoryStream(buffer))
                 {
-                    using (CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, decryptor, CryptoStreamMode.Read))
+                    using (var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read))
                     {
-                        using (StreamReader streamReader = new StreamReader((Stream)cryptoStream))
+                        using (var streamReader = new StreamReader(cryptoStream))
                         {
                             return streamReader.ReadToEnd();
                         }

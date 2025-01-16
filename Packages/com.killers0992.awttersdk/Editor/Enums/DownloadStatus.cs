@@ -6,6 +6,6 @@
         Installing,
         Importing,
         Installed,
-        Failed,
+        Failed
     }
 }

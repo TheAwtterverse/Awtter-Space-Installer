@@ -1,21 +1,22 @@
-﻿using AwtterSDK;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using AwtterSDK;
 
 namespace Assets.Awtter_SDK.Editor.Models
 {
     public class ToolView
     {
-        public static List<string> InstallByDefault = new List<string>()
+        public static List<string> InstallByDefault = new()
         {
             "awttermerger",
-            "poiyomi",
+            "poiyomi"
         };
 
+        private Version _currentVersion;
+
         private bool? _install;
+
+        private Version _newVersion;
         private string _simpleName;
 
         public int Id { get; set; }
@@ -36,10 +37,10 @@ namespace Assets.Awtter_SDK.Editor.Models
         public string Version { get; set; }
         public string InstalledVersion { get; set; }
         public string DownloadUrl { get; set; }
-        public bool IsInstalled => AwtterSdkInstaller.InstalledPackages != null && AwtterSdkInstaller.InstalledPackages.Tools.ContainsKey(SimpleName);
 
-        private Version _newVersion;
-        private Version _currentVersion;
+        public bool IsInstalled => AwtterSdkInstaller.InstalledPackages != null &&
+                                   AwtterSdkInstaller.InstalledPackages.Tools.ContainsKey(SimpleName);
+
         public bool IsOutdated
         {
             get
@@ -53,6 +54,7 @@ namespace Assets.Awtter_SDK.Editor.Models
                 return _currentVersion.CompareTo(_newVersion) > 0;
             }
         }
+
         public bool Install
         {
             get
@@ -64,13 +66,10 @@ namespace Assets.Awtter_SDK.Editor.Models
                     else
                         _install = false;
                 }
-                   
+
                 return _install.Value;
             }
-            set
-            {
-                _install = value;
-            }
+            set => _install = value;
         }
     }
 }

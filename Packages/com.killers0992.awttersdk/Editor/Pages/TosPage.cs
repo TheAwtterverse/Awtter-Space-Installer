@@ -1,25 +1,32 @@
-﻿namespace AwtterSDK.Editor.Pages
-{
-    using AwtterSDK.Editor.Interfaces;
-    using System;
-    using UnityEditor;
-    using UnityEngine;
+﻿using System;
+using AwtterSDK.Editor.Interfaces;
+using UnityEditor;
+using UnityEngine;
 
+namespace AwtterSDK.Editor.Pages
+{
     public class TosPage : IPage
     {
         private static bool? _tosAccepted;
         private static int? _tosVersion;
 
+        private static string[] _tosLines;
+
+        private AwtterSdkInstaller _main;
+        public GUIStyle CustomLabel;
+
+        public Vector2 ScrollPosition = Vector2.zero;
+
         public static bool TosAccepted
         {
-            get 
+            get
             {
                 if (!_tosAccepted.HasValue)
                     _tosAccepted = EditorPrefs.GetBool("AwSdkTos");
 
                 return _tosAccepted.Value;
             }
-            set 
+            set
             {
                 EditorPrefs.SetBool("AwSdkTos", value);
                 _tosAccepted = value;
@@ -42,13 +49,6 @@
             }
         }
 
-        static string[] _tosLines = null;
-
-        public Vector2 ScrollPosition = Vector2.zero;
-        public GUIStyle CustomLabel;
-
-        private AwtterSdkInstaller _main;
-
         public void Load(AwtterSdkInstaller main)
         {
             _main = main;
@@ -62,16 +62,14 @@
             GUILayout.BeginVertical("Terms of service", "window", GUILayout.Height(250));
 
             if (AwtterSdkInstaller.RemoteConfig != null)
-            {
                 if (TosAccepted && AwtterSdkInstaller.RemoteConfig.Tos.Version > TosVersion)
                     TosAccepted = false;
-            }
 
             if (_tosLines == null)
             {
                 if (AwtterSdkInstaller.RemoteConfig != null)
                     _tosLines = AwtterSdkInstaller.RemoteConfig.Tos.Text.Split(
-                        new string[] { Environment.NewLine },
+                        new[] { Environment.NewLine },
                         StringSplitOptions.None
                     );
 
@@ -84,19 +82,19 @@
 
             ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, false, true);
 
-            foreach(var line in _tosLines)
-            {
+            foreach (var line in _tosLines)
                 if (line.StartsWith("https://"))
                 {
                     if (GUILayout.Button(line))
                         Application.OpenURL(line);
                 }
                 else
+                {
                     GUILayout.Label(line, CustomLabel);
-            }
+                }
 
             GUILayout.EndScrollView();
-            
+
             if (GUILayout.Button("Accept TOS"))
             {
                 TosVersion = AwtterSdkInstaller.RemoteConfig.Tos.Version;

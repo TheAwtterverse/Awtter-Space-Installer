@@ -1,9 +1,13 @@
 ﻿using System;
+using AwtterSDK.Editor.Models.API;
 
 namespace AwtterSDK.Editor.Models
 {
     public class DlcView
     {
+        private Version _currentVersion;
+
+        private Version _newVersion;
         public int Id { get; set; }
         public int ProductId { get; set; }
         public string Icon { get; set; }
@@ -14,10 +18,11 @@ namespace AwtterSDK.Editor.Models
         public bool IsProp { get; set; }
         public bool IsDlc { get; set; }
         public bool IsPatreon { get; set; }
-        public bool IsInstalled => AwtterSdkInstaller.InstalledPackages != null && AwtterSdkInstaller.InstalledPackages.Dlcs.ContainsKey(Id);
+        public CategoryModel Category { get; set; }
 
-        private Version _newVersion;
-        private Version _currentVersion;
+        public bool IsInstalled => AwtterSdkInstaller.InstalledPackages != null &&
+                                   AwtterSdkInstaller.InstalledPackages.Dlcs.ContainsKey(Id);
+
         public bool IsOutdated
         {
             get
@@ -31,6 +36,7 @@ namespace AwtterSDK.Editor.Models
                 return _currentVersion.CompareTo(_newVersion) > 0;
             }
         }
+
         public bool Install { get; set; }
     }
 }

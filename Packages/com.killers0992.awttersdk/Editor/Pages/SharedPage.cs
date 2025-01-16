@@ -1,6 +1,6 @@
-﻿using Assets.Awtter_SDK.Editor;
+﻿using System.IO;
+using Assets.Awtter_SDK.Editor;
 using AWBOI.SplashScreen;
-using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,32 +8,10 @@ namespace AwtterSDK.Editor.Pages
 {
     public class SharedPage
     {
-        private Texture2D _windowBackground;
         private Texture2D _awtterSdkImage;
 
         internal AwtterSdkInstaller _main;
-
-        public Texture2D WindowBackground
-        {
-            get
-            {
-                if (_windowBackground == null)
-                    _windowBackground = Utils.CreateTexture((int)_main.maxSize.x, (int)_main.maxSize.y, new Color32(35, 35, 35, 255));
-
-                return _windowBackground;
-            }
-        }
-
-        public Texture2D AwtterSdkImage
-        {
-            get
-            {
-                if (_awtterSdkImage == null)
-                    _awtterSdkImage = AssetDatabase.LoadAssetAtPath<Texture2D>(Path.Combine(Paths.MainPath, "Editor", "Textures", "sdk.png"));
-
-                return _awtterSdkImage;
-            }
-        }
+        private Texture2D _windowBackground;
 
         public GUIStyle WindowCustomButton;
         public GUIStyle WindowCustomButton2;
@@ -46,9 +24,33 @@ namespace AwtterSDK.Editor.Pages
             Load();
         }
 
+        public Texture2D WindowBackground
+        {
+            get
+            {
+                if (_windowBackground == null)
+                    _windowBackground = Utils.CreateTexture((int)_main.maxSize.x, (int)_main.maxSize.y,
+                        new Color32(35, 35, 35, 255));
+
+                return _windowBackground;
+            }
+        }
+
+        public Texture2D AwtterSdkImage
+        {
+            get
+            {
+                if (_awtterSdkImage == null)
+                    _awtterSdkImage =
+                        AssetDatabase.LoadAssetAtPath<Texture2D>(Path.Combine(Paths.MainPath, "Editor", "Textures",
+                            "sdk.png"));
+
+                return _awtterSdkImage;
+            }
+        }
+
         public void Load()
         {
-
             if (WindowCustomButton == null)
             {
                 WindowCustomButton = new GUIStyle(GUI.skin.button);
@@ -104,32 +106,34 @@ namespace AwtterSDK.Editor.Pages
                 GUI.DrawTexture(new Rect(0, 78, pos.size.x, 180), AwtterSdkImage, ScaleMode.ScaleToFit);
             GUILayout.Space(170);
 
-            if (AwtterSdkInstaller.LoggedInUser != null) 
+            if (AwtterSdkInstaller.LoggedInUser != null)
                 LoggedIn();
         }
 
-        void LoggedIn()
+        private void LoggedIn()
         {
             EditorGUILayout.BeginHorizontal();
-            GUILayout.Label($"Logged in as {AwtterSdkInstaller.LoggedInUser?.Username ?? "-|-"} [{AwtterSdkInstaller.LoggedInUser?.Id}]!");
+            GUILayout.Label(
+                $"Logged in as {AwtterSdkInstaller.LoggedInUser?.Username ?? "-|-"} [{AwtterSdkInstaller.LoggedInUser?.Id}]!");
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button($"Settings", _main.Shared.WindowCustomButton))
+            if (GUILayout.Button("Settings", _main.Shared.WindowCustomButton))
                 AwtterSdkInstaller.ViewSettings = !AwtterSdkInstaller.ViewSettings;
             if (GUILayout.Button("Logout", _main.Shared.WindowCustomButton, GUILayout.MinHeight(16)))
-            { 
+            {
                 TokenCache.Token = string.Empty;
                 AwtterSdkInstaller.LoggedIn = false;
             }
+
             EditorGUILayout.EndHorizontal();
         }
 
-        void LinkButtons()
+        private void LinkButtons()
         {
             EditorGUILayout.BeginVertical();
-            int count = 0;
+            var count = 0;
             EditorGUILayout.BeginHorizontal();
 
-            for (int x = 0; x < _main.Settings.Buttons.Count; x++)
+            for (var x = 0; x < _main.Settings.Buttons.Count; x++)
             {
                 ButtonLink(_main.Settings.Buttons[x]);
 
@@ -140,7 +144,7 @@ namespace AwtterSDK.Editor.Pages
                     case 2:
                         EditorGUILayout.EndHorizontal();
                         count = 0;
-                        if (x != _main.Settings.Buttons.Count-1)
+                        if (x != _main.Settings.Buttons.Count - 1)
                             EditorGUILayout.BeginHorizontal();
                         break;
                 }
@@ -149,21 +153,20 @@ namespace AwtterSDK.Editor.Pages
             EditorGUILayout.EndVertical();
         }
 
-        void ButtonLink(SplashButton button)
+        private void ButtonLink(SplashButton button)
         {
-            GUIContent content = new GUIContent();
+            var content = new GUIContent();
             if (button.Image != null)
             {
-                content.image = (Texture2D)button.Image;
+                content.image = button.Image;
                 content.text = button.ButtonText;
             }
             else
             {
                 content = new GUIContent(button.ButtonText);
             }
-             
+
             if (GUILayout.Button(content, WindowCustomButton, GUILayout.MinWidth(160), GUILayout.MinHeight(25)))
-            {
                 switch (button.ButtonType)
                 {
                     case SplashButton.bType.WebLink:
@@ -173,17 +176,13 @@ namespace AwtterSDK.Editor.Pages
                         if (button.Link != "")
                         {
                             if (button.Link == "changelogs")
-                            {
                                 ChangeLogsMenu.ShowChangelogs();
-                            }
                             else
-                            {
                                 Application.OpenURL(Path.Combine(Paths.MainPath, button.Link));
-                            }
                         }
+
                         break;
                 }
-            }
         }
 
         public void Bottom(Rect pos)
@@ -191,10 +190,8 @@ namespace AwtterSDK.Editor.Pages
             EditorGUILayout.BeginHorizontal(GUILayout.MaxHeight(32));
             GUILayout.Label("Show window on startup");
             GUI.color = AwtterSdkInstaller.ShowOnStartup ? Color.green : Color.red;
-            if (GUILayout.Button(AwtterSdkInstaller.ShowOnStartup ? $"Enabled" : "Disabled", WindowCustomButton, GUILayout.MaxWidth(64)))
-            {
-                AwtterSdkInstaller.ShowOnStartup = !AwtterSdkInstaller.ShowOnStartup;
-            }
+            if (GUILayout.Button(AwtterSdkInstaller.ShowOnStartup ? "Enabled" : "Disabled", WindowCustomButton,
+                    GUILayout.MaxWidth(64))) AwtterSdkInstaller.ShowOnStartup = !AwtterSdkInstaller.ShowOnStartup;
             GUI.color = Color.white;
             EditorGUILayout.EndHorizontal();
         }

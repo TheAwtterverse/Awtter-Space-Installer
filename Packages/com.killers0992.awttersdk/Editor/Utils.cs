@@ -7,17 +7,17 @@ namespace AwtterSDK.Editor
 {
     public static class Utils
     {
-        static readonly string[] suffixes =
+        private static readonly string[] suffixes =
             { "Bytes", "KB", "MB", "GB", "TB", "PB" };
 
         public static Texture2D CreateTexture(int width, int height, Color col)
         {
-            Color[] pix = new Color[width*height];
+            var pix = new Color[width * height];
 
-            for (int i = 0; i < pix.Length; i++)
+            for (var i = 0; i < pix.Length; i++)
                 pix[i] = col;
 
-            Texture2D result = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            var result = new Texture2D(width, height, TextureFormat.RGBA32, false);
             result.SetPixels(pix);
             result.Apply();
 
@@ -27,30 +27,25 @@ namespace AwtterSDK.Editor
         public static long DirectorySize(DirectoryInfo d)
         {
             long size = 0;
-            FileInfo[] fis = d.GetFiles();
-            foreach (FileInfo fi in fis)
-            {
-                size += fi.Length;
-            }
+            var fis = d.GetFiles();
+            foreach (var fi in fis) size += fi.Length;
 
-            DirectoryInfo[] dis = d.GetDirectories();
-            foreach (DirectoryInfo di in dis)
-            {
-                size += DirectorySize(di);
-            }
+            var dis = d.GetDirectories();
+            foreach (var di in dis) size += DirectorySize(di);
             return size;
         }
 
 
         public static string FormatSize(long bytes)
         {
-            int counter = 0;
-            decimal number = (decimal)bytes;
+            var counter = 0;
+            decimal number = bytes;
             while (Math.Round(number / 1024) >= 1)
             {
                 number = number / 1024;
                 counter++;
             }
+
             return string.Format("{0:n1}{1}", number, suffixes[counter]);
         }
 

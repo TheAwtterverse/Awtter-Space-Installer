@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEngine;
@@ -13,12 +9,12 @@ namespace AwtterSDK.Editor
 {
     public class TextureCache
     {
-        public static TextureCache Object = new TextureCache();
+        public static TextureCache Object = new();
 
         public static Texture DefaultTexture;
-        public static List<string> DownloadingInProgress = new List<string>();
-        public static Queue<string> TexturesToDownload = new Queue<string>();
-        public static Dictionary<string, Texture> CachedTextures = new Dictionary<string, Texture>();
+        public static List<string> DownloadingInProgress = new();
+        public static Queue<string> TexturesToDownload = new();
+        public static Dictionary<string, Texture> CachedTextures = new();
 
         public static Texture GetTextureOrDownload(string url)
         {
@@ -51,7 +47,7 @@ namespace AwtterSDK.Editor
 
                 DownloadingInProgress.Add(link);
 
-                using (WebClient client = new WebClient())
+                using (var client = new WebClient())
                 {
                     byte[] data;
                     try
@@ -63,12 +59,14 @@ namespace AwtterSDK.Editor
                         Debug.LogError($"[<color=orange>Awtter SDK</color>] Failed download icon for {link},\n{ex}");
                         continue;
                     }
-                    Texture2D tex = new Texture2D(2, 2);
+
+                    var tex = new Texture2D(2, 2);
                     tex.LoadImage(data);
 
                     CachedTextures[link] = tex;
                 }
             }
+
             yield break;
         }
     }

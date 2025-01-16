@@ -1,10 +1,5 @@
-﻿using AwtterSDK.Editor.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
+using AwtterSDK.Editor.Interfaces;
 using UnityEditor;
 using UnityEngine;
 
@@ -13,18 +8,21 @@ namespace AwtterSDK.Editor.Pages
     public class ResetPage : IPage
     {
         private Texture2D _awttersdkwarningimage;
+
+        private AwtterSdkInstaller _main;
+
         public Texture2D AwtterSdkWarningImage
         {
             get
             {
                 if (_awttersdkwarningimage == null)
-                    _awttersdkwarningimage = AssetDatabase.LoadAssetAtPath<Texture2D>(Path.Combine(Paths.MainPath, "Editor", "Textures", "warningsdk.png"));
+                    _awttersdkwarningimage =
+                        AssetDatabase.LoadAssetAtPath<Texture2D>(Path.Combine(Paths.MainPath, "Editor", "Textures",
+                            "warningsdk.png"));
 
                 return _awttersdkwarningimage;
             }
         }
-
-        private AwtterSdkInstaller _main;
 
         public void Load(AwtterSdkInstaller main)
         {
@@ -64,7 +62,8 @@ namespace AwtterSDK.Editor.Pages
             GUILayout.FlexibleSpace();
             GUI.color = Color.green;
 
-            if (GUILayout.Button($"YES", _main.Shared.WindowCustomButton3, GUILayout.MinWidth(50), GUILayout.MinHeight(32)))
+            if (GUILayout.Button("YES", _main.Shared.WindowCustomButton3, GUILayout.MinWidth(50),
+                    GUILayout.MinHeight(32)))
             {
                 FileUtil.DeleteFileOrDirectory("Assets/_Shade The Bat");
                 FileUtil.DeleteFileOrDirectory("Assets/AwtterInstalledPackages.json");
@@ -73,13 +72,12 @@ namespace AwtterSDK.Editor.Pages
 
                 AwtterSdkInstaller.ViewReset = !AwtterSdkInstaller.ViewReset;
             }
+
             GUI.color = Color.red;
             GUILayout.Space(50);
 
-            if (GUILayout.Button($"BACK", _main.Shared.WindowCustomButton3, GUILayout.MinWidth(50), GUILayout.MinHeight(32)))
-            {
-                AwtterSdkInstaller.ViewReset = !AwtterSdkInstaller.ViewReset;
-            }
+            if (GUILayout.Button("BACK", _main.Shared.WindowCustomButton3, GUILayout.MinWidth(50),
+                    GUILayout.MinHeight(32))) AwtterSdkInstaller.ViewReset = !AwtterSdkInstaller.ViewReset;
             GUILayout.FlexibleSpace();
             GUI.color = Color.white;
             EditorGUILayout.EndHorizontal();

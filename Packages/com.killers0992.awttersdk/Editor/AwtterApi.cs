@@ -1,16 +1,12 @@
-﻿namespace AwtterSDK.Editor
+﻿using System.Collections;
+using AwtterSDK.Editor.Enums;
+using AwtterSDK.Editor.Models.API;
+using Newtonsoft.Json;
+using UnityEngine;
+using UnityEngine.Networking;
+
+namespace AwtterSDK.Editor
 {
-    using UnityEngine.Networking;
-    using UnityEngine;
-
-    using Newtonsoft.Json;
-
-    using System.Collections;
-
-    using AwtterSDK;
-    using AwtterSDK.Editor.Models.API;
-    using AwtterSDK.Editor.Enums;
-
     public class AwtterApi
     {
         public static IEnumerator GetProducts(bool isFirst = true)
@@ -31,7 +27,6 @@
                     AwtterSdkInstaller.LoggedIn = true;
                 }
             }
-            yield break;
         }
 
         public static IEnumerator GetConfig()
@@ -47,9 +42,7 @@
                 if (okResponse.Status == StatusType.Success)
                     AwtterSdkInstaller.RemoteConfig = okResponse.Data;
             }
-            yield break;
         }
-
 
         public static IEnumerator GetCurrentUser()
         {
@@ -67,7 +60,6 @@
 
                 AwtterSdkInstaller.LoggedInUser = model.Data;
             }
-            yield break;
         }
 
         public static IEnumerator GetToolbox()
@@ -84,16 +76,12 @@
 
                 if (model.Status != StatusType.Success) yield break;
 
-                foreach (var tool in model.Data.Files)
-                {
-                    tool.IsTool = true;
-                }
+                foreach (var tool in model.Data.Files) tool.IsTool = true;
 
                 model.Data.Files.RemoveAll(x => x.Name == "7zip");
 
                 AwtterSdkInstaller.Toolbox = model.Data;
             }
-            yield break;
         }
 
         public static IEnumerator GetPatreon()
@@ -113,7 +101,29 @@
                 AwtterSdkInstaller.Patreon = model.Data;
                 AwtterSdkInstaller.RefreshAwtterPackages = true;
             }
-            yield break;
+        }
+
+        public static IEnumerator GetMarketplace()
+        {
+            using (var www = UnityWebRequest.Get("https://awtterspace.com/api/v2/marketplace"))
+            {
+                www.SetRequestHeader("Authorization", $"Token {TokenCache.Token}");
+
+                yield return www.SendWebRequest();
+
+                if (www.responseCode != 200) yield break;
+
+                var model = JsonConvert.DeserializeObject<MarketplaceResponseModel>(www.downloadHandler.text);
+
+                if (model.Status != StatusType.Success) yield break;
+
+                foreach (var p in model.Data)
+                foreach (var f in p.Files)
+                    f.IsMarketPlace = true;
+
+                AwtterSdkInstaller.Marketplace = model.Data;
+                AwtterSdkInstaller.RefreshAwtterPackages = true;
+            }
         }
     }
 }

@@ -1,22 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using AwtterSDK;
 using UnityEditor;
-using UnityEngine.SceneManagement;
-using UnityEngine.Networking;
-using System.Text;
-using System.Security.Cryptography;
-using System;
-using UnityEditor.SceneManagement;
-using AwtterSDK;
+using UnityEngine;
 
 namespace AWBOI.SplashScreen
 {
-    [CustomEditor(typeof(AWBOI.SplashScreen.AwboiSplashButtons))]
+    [CustomEditor(typeof(AwboiSplashButtons))]
     public class AwboiSplashButtonsInspector : Editor
     {
+        public bool ButtonsFoldout;
         public bool NamesFoldout = false;
-        public bool ButtonsFoldout = false;
 
         #region EDITOR_GUI
 
@@ -29,11 +21,13 @@ namespace AWBOI.SplashScreen
             EditorGUILayout.Separator();
             EditorGUILayout.Space(25);
             var SceneFolder = serializedObject.FindProperty(nameof(AwboiSplashButtons.SceneFolder));
-            EditorGUILayout.PropertyField(SceneFolder, new GUIContent(nameof(AwboiSplashButtons.SceneFolder), "This should be the path to the folder that contains the scenes listed in Scenes."));
+            EditorGUILayout.PropertyField(SceneFolder,
+                new GUIContent(nameof(AwboiSplashButtons.SceneFolder),
+                    "This should be the path to the folder that contains the scenes listed in Scenes."));
 
             EditorGUILayout.Separator();
-                
-                
+
+
             HandleButtons();
 
             serializedObject.ApplyModifiedProperties();
@@ -46,17 +40,19 @@ namespace AWBOI.SplashScreen
             var Buttons = serializedObject.FindProperty("Buttons");
             EditorGUI.indentLevel += 1;
             EditorGUILayout.BeginHorizontal();
-            ButtonsFoldout = EditorGUILayout.Foldout(ButtonsFoldout, new GUIContent($"{Buttons.arraySize} Splash Buttons: "));
+            ButtonsFoldout =
+                EditorGUILayout.Foldout(ButtonsFoldout, new GUIContent($"{Buttons.arraySize} Splash Buttons: "));
             if (GUILayout.Button(new GUIContent("Add New Button")))
             {
-                var splashButtons = serializedObject.targetObject as AWBOI.SplashScreen.AwboiSplashButtons;
+                var splashButtons = serializedObject.targetObject as AwboiSplashButtons;
 
-                var button = new AWBOI.SplashScreen.SplashButton("New Button", "");
+                var button = new SplashButton("New Button", "");
                 splashButtons.Buttons.Add(button);
                 ButtonsFoldout = true;
             }
+
             EditorGUILayout.EndHorizontal();
-            
+
 
             if (Buttons.arraySize > 0)
             {
@@ -64,25 +60,26 @@ namespace AWBOI.SplashScreen
                 if (ButtonsFoldout)
                 {
                     EditorGUILayout.BeginVertical(GUI.skin.box);
-                    for (int i = 0; i < Buttons.arraySize; i++)
+                    for (var i = 0; i < Buttons.arraySize; i++)
                     {
                         var button = Buttons.GetArrayElementAtIndex(i);
-                        DrawButton(Buttons, button as SerializedProperty, i);
+                        DrawButton(Buttons, button, i);
                         GUILayout.Space(25);
                     }
+
                     EditorGUILayout.EndVertical();
                 }
+
                 EditorGUI.indentLevel -= 1;
             }
 
             EditorGUILayout.EndVertical();
             EditorGUI.indentLevel -= 1;
-
         }
 
         public void DrawButton(SerializedProperty buttons, SerializedProperty button, int index)
         {
-            var allbuttons = target as AWBOI.SplashScreen.AwboiSplashButtons;
+            var allbuttons = target as AwboiSplashButtons;
             var thisButton = allbuttons.Buttons[index];
 
             var bText = button.FindPropertyRelative("ButtonText");
@@ -96,13 +93,14 @@ namespace AWBOI.SplashScreen
 
             switch (thisButton.ButtonType)
             {
-                case AWBOI.SplashScreen.SplashButton.bType.WebLink:
+                case SplashButton.bType.WebLink:
                     EditorGUILayout.PropertyField(link);
                     break;
-                case AWBOI.SplashScreen.SplashButton.bType.File:
+                case SplashButton.bType.File:
                     EditorGUILayout.PropertyField(link, new GUIContent("File Path"));
                     break;
             }
+
             EditorGUILayout.PropertyField(image);
 
             UIArrayHandler(buttons, index);
@@ -124,22 +122,20 @@ namespace AWBOI.SplashScreen
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Up", GUILayout.Width(64)))
-            {
                 if (itemIdx > 0)
                     serArray.MoveArrayElement(itemIdx, itemIdx - 1);
-            }
             if (GUILayout.Button("Down", GUILayout.Width(64)))
-            {
                 if (itemIdx < serArray.arraySize - 1)
                     serArray.MoveArrayElement(itemIdx, itemIdx + 1);
-            }
             if (GUILayout.Button("Delete", GUILayout.Width(64)))
             {
                 serArray.DeleteArrayElementAtIndex(itemIdx);
                 return;
             }
+
             GUILayout.EndHorizontal();
         }
+
         #endregion
     }
 }

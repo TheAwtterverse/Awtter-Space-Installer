@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using AwtterSDK.Editor.Enums;
 
 namespace AwtterSDK.Editor.Models.API
 {
-    public class ProductsModel
+    public class MarketplaceResponseModel
     {
-        public string Status { get; set; }
+        public StatusType Status { get; set; }
         public List<ProductModel> Data { get; set; }
     }
 }

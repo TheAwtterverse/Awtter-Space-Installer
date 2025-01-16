@@ -1,32 +1,25 @@
-﻿namespace AwtterSDK.Editor.Pages
+﻿using System.Collections;
+using System.Collections.Generic;
+using AwtterSDK.Editor.Enums;
+using AwtterSDK.Editor.Interfaces;
+using AwtterSDK.Editor.Models.API;
+using Newtonsoft.Json;
+using Unity.EditorCoroutines.Editor;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.Networking;
+
+namespace AwtterSDK.Editor.Pages
 {
-    using UnityEditor;
-
-    using UnityEngine;
-    using UnityEngine.Networking;
-
-    using AwtterSDK.Editor.Interfaces;
-    using AwtterSDK.Editor.Models.API;
-
-    using Unity.EditorCoroutines.Editor;
-
-    using System.Collections;
-    using System.Collections.Generic;
-    using AwtterSDK.Editor;
-    using Newtonsoft.Json;
-    using AwtterSDK;
-    using AwtterSDK.Editor.Enums;
-
     public class LoginPage : IPage
     {
+        private AwtterSdkInstaller _main;
+
+        public string ErrorBox;
+        public string Password = string.Empty;
         public bool TryLogin = true;
 
         public string Username = string.Empty;
-        public string Password = string.Empty;
-
-        public string ErrorBox = null;
-
-        private AwtterSdkInstaller _main;
 
         public void Load(AwtterSdkInstaller main)
         {
@@ -40,6 +33,7 @@
                 EditorCoroutineUtility.StartCoroutine(Login(true), this);
                 TryLogin = false;
             }
+
             GUILayout.FlexibleSpace();
             GUILayout.BeginVertical("Account", "window", GUILayout.Height(120));
 
@@ -57,11 +51,21 @@
 
             GUI.enabled = true;
 
-            if (GUILayout.Button("Register")) 
+            if (GUILayout.Button("Register"))
                 Application.OpenURL("https://shadedoes3d.com/accounts/register/");
 
             GUILayout.EndVertical();
             GUILayout.FlexibleSpace();
+        }
+
+        public void Reset()
+        {
+            TryLogin = true;
+
+            Username = string.Empty;
+            Password = string.Empty;
+
+            ErrorBox = null;
         }
 
         public IEnumerator Login(bool first = false)
@@ -73,11 +77,11 @@
 
             if (first) yield break;
 
-            using (var www = UnityWebRequest.Post("https://shadedoes3d.com/api/auth", new Dictionary<string, string>()
-            {
-                { "username", Username },
-                { "password", Password }
-            }))
+            using (var www = UnityWebRequest.Post("https://shadedoes3d.com/api/auth", new Dictionary<string, string>
+                   {
+                       { "username", Username },
+                       { "password", Password }
+                   }))
             {
                 yield return www.SendWebRequest();
 
@@ -108,16 +112,6 @@
                         break;
                 }
             }
-        }
-
-        public void Reset()
-        {
-            TryLogin = true;
-
-            Username = string.Empty;
-            Password = string.Empty;
-
-            ErrorBox = null;
         }
     }
 }

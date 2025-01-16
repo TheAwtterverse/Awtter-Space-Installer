@@ -6,6 +6,7 @@ namespace AwtterSDK.Editor
     public class Paths
     {
         private static string _packagesPath;
+
         public static string PackagesPath
         {
             get
@@ -16,6 +17,7 @@ namespace AwtterSDK.Editor
                 return _packagesPath;
             }
         }
+
         public static string MainPath => "Packages\\com.killers0992.awttersdk";
     }
 }

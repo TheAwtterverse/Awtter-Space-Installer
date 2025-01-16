@@ -1,7 +1,6 @@
-﻿using AwtterSDK.Editor.Models;
-using System;
-using System.Data;
+﻿using System;
 using System.IO;
+using AwtterSDK.Editor.Models;
 using Unity.SharpZipLib.Zip;
 using UnityEditor;
 
@@ -10,6 +9,10 @@ namespace AwtterSDK.Editor
     public class FilesCache
     {
         private static FastZip _fastZip;
+
+        private static string _mainPath;
+
+        private static string _cachePath;
 
         public static FastZip Zip
         {
@@ -22,14 +25,14 @@ namespace AwtterSDK.Editor
             }
         }
 
-        private static string _mainPath;
         public static string MainPath
         {
             get
             {
                 if (_mainPath == null)
                 {
-                    _mainPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Awtter SDK");
+                    _mainPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                        "Awtter SDK");
                     if (!Directory.Exists(_mainPath)) Directory.CreateDirectory(_mainPath);
                 }
 
@@ -37,7 +40,6 @@ namespace AwtterSDK.Editor
             }
         }
 
-        private static string _cachePath;
         public static string CachePath
         {
             get
@@ -54,7 +56,8 @@ namespace AwtterSDK.Editor
 
         public static string CacheFile(FileToInstallModel file, byte[] bytes)
         {
-            string path = Path.Combine(CachePath, file.IsUnityPackage ? $"{file.Id}_{file.Version}" : $"{file.Name}_{file.Version}");
+            var path = Path.Combine(CachePath,
+                file.IsUnityPackage ? $"{file.Id}_{file.Version}" : $"{file.Name}_{file.Version}");
 
             File.WriteAllBytes(path, bytes);
             return path;
@@ -62,7 +65,8 @@ namespace AwtterSDK.Editor
 
         public static bool GetCachedFile(FileToInstallModel file)
         {
-            string path = Path.Combine(CachePath, file.IsUnityPackage ? $"{file.Id}_{file.Version}" : $"{file.Name}_{file.Version}");
+            var path = Path.Combine(CachePath,
+                file.IsUnityPackage ? $"{file.Id}_{file.Version}" : $"{file.Name}_{file.Version}");
             if (!File.Exists(path))
                 return false;
 

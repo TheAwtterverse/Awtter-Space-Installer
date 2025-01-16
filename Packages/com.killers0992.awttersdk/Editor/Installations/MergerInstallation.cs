@@ -1,26 +1,22 @@
-﻿using AwtterSDK.Editor.Interfaces;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using AwtterSDK.Editor.Interfaces;
 
 namespace AwtterSDK.Editor.Installations
 {
     public class MergerInstallation : ICheckInstallStatus
     {
-        Version _version;
-        bool _isInstalled;
-        public bool IsInstalled => _isInstalled;
+        private Version _version;
+        public bool IsInstalled { get; private set; }
+
         public Version InstalledVersion => _version;
 
         public void Check()
         {
-            _isInstalled = Directory.Exists("Assets/AwboiMerger");
+            IsInstalled = Directory.Exists("Assets/AwboiMerger");
 
-            if (_isInstalled)
+            if (IsInstalled)
             {
                 var targetFile = "Assets/AwboiMerger/AWBOI_MERGER.dll";
 

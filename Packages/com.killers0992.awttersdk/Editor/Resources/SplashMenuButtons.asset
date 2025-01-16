@@ -16,11 +16,11 @@ MonoBehaviour:
   SceneFolder: "-\u0295\u2022\u1D25\u2022\u0294 OPEN THIS FIRST \u0295\u2022\u1D25\u2022\u0294"
   Buttons:
   - ButtonType: 1
-    ButtonText: '  '
+    ButtonText: ''
     Link: 
     Image: {fileID: 0}
   - ButtonType: 1
-    ButtonText: '  '
+    ButtonText: ''
     Link: 
     Image: {fileID: 0}
   - ButtonType: 0
@@ -37,5 +37,5 @@ MonoBehaviour:
     Image: {fileID: 2800000, guid: 0051dc466632f704eb5d088260c60fb5, type: 3}
   - ButtonType: 0
     ButtonText: '  How to upload 3.0'
-    Link: https://www.youtube.com/watch?v=mGnFyus_U_U
+    Link: https://www.youtube.com/watch?v=vYs8gDWjKv8
     Image: {fileID: 2800000, guid: 812656142d0b1ee438797d5b6132ed45, type: 3}

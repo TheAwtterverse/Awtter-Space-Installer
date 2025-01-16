@@ -1,7 +1,7 @@
-﻿namespace AwtterSDK.Editor.Models.API
-{
-    using AwtterSDK.Editor.Enums;
+﻿using AwtterSDK.Editor.Enums;
 
+namespace AwtterSDK.Editor.Models.API
+{
     public class AuthBadResponseModel
     {
         public StatusType Status { get; set; }

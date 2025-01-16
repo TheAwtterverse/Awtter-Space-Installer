@@ -1,21 +1,16 @@
-﻿using AwtterSDK.Editor.Installations;
+﻿using System.Collections.Generic;
+using System.Linq;
 using AwtterSDK.Editor.Interfaces;
 using AwtterSDK.Editor.Models;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Unity.EditorCoroutines.Editor;
-using Unity.SharpZipLib.Zip;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace AwtterSDK.Editor.Pages
 {
-    class AwtterSdkAssets : AssetPostprocessor
+    internal class AwtterSdkAssets : AssetPostprocessor
     {
-        static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
+        private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets,
+            string[] movedAssets, string[] movedFromAssetPaths)
         {
             if (AwtterSdkInstaller.IsInstalling) return;
 
@@ -28,21 +23,21 @@ namespace AwtterSDK.Editor.Pages
     {
         public static bool CheckForChanges;
 
-        public List<UnityPackageFile> PackagesToInstall = new List<UnityPackageFile>();
+        private AwtterSdkInstaller _main;
+
+        public Vector2 BasesScroll = Vector2.zero;
 
         public GUIStyle CustomButton;
         public GUIStyle CustomLabel;
-
-        public Vector2 BasesScroll = Vector2.zero;
         public Vector2 DlcsScroll = Vector2.zero;
         public Vector2 InstallStatus = Vector2.zero;
-        public Vector2 OutdateStatus = Vector2.zero;
-
-        public bool ShowingBases;
 
         public bool IsUpToDate;
+        public Vector2 OutdateStatus = Vector2.zero;
 
-        private AwtterSdkInstaller _main;
+        public List<UnityPackageFile> PackagesToInstall = new();
+
+        public bool ShowingBases;
 
         public void Load(AwtterSdkInstaller main)
         {
@@ -58,28 +53,6 @@ namespace AwtterSDK.Editor.Pages
             CheckChanges();
         }
 
-        void RefreshDlcs()
-        {
-            foreach (var dlc in AwtterSdkInstaller.AvaliableDlcs)
-                dlc.Install = false;
-        }
-
-        void CheckChanges()
-        {
-            if (AwtterSdkInstaller.Products == null) return;
-
-            RefreshDlcs();
-
-            PackagesToInstall.Clear();
-
-            foreach (var package in AwtterSdkInstaller.UnityPackages)
-            {
-                package.InstallStatus.Check();
-                if (!package.InstallStatus.IsInstalled)
-                    PackagesToInstall.Add(package);
-            }
-        }
-
         public void DrawGUI(Rect pos)
         {
             if (CheckForChanges)
@@ -87,8 +60,11 @@ namespace AwtterSDK.Editor.Pages
 
             GUILayout.Space(10f);
 
-            if (EditorGUILayout.DropdownButton(AwtterSdkInstaller.CurrentBase == null ? new GUIContent("Select base to install") :
-                new GUIContent($"Selected base {AwtterSdkInstaller.CurrentBase.Name}"), FocusType.Keyboard, GUILayout.Height(25)))
+            if (EditorGUILayout.DropdownButton(
+                    AwtterSdkInstaller.CurrentBase == null
+                        ? new GUIContent("Select base to install")
+                        : new GUIContent($"Selected base {AwtterSdkInstaller.CurrentBase.Name}"), FocusType.Keyboard,
+                    GUILayout.Height(25)))
                 ShowingBases = !ShowingBases;
 
             GUILayout.Space(10f);
@@ -100,20 +76,21 @@ namespace AwtterSDK.Editor.Pages
                 foreach (var baseModel in AwtterSdkInstaller.AvaliableBases.Where(x => !x.IsInstalled))
                 {
                     GUILayout.BeginHorizontal();
-                    GUILayout.Box(TextureCache.GetTextureOrDownload(baseModel.Icon), GUILayout.Height(32), GUILayout.Width(32));
+                    GUILayout.Box(TextureCache.GetTextureOrDownload(baseModel.Icon), GUILayout.Height(32),
+                        GUILayout.Width(32));
                     GUI.color = AwtterSdkInstaller.CurrentBase == baseModel ? Color.green : Color.white;
                     if (GUILayout.Button(baseModel.Name, CustomButton, GUILayout.Height(32)))
-                    {
                         if (AwtterSdkInstaller.CurrentBase != baseModel)
                         {
                             AwtterSdkInstaller.CurrentBase = baseModel;
                             _main.UpdateAwtterPackages();
                             ShowingBases = false;
                         }
-                    }
+
                     GUI.color = Color.white;
                     GUILayout.EndHorizontal();
                 }
+
                 GUILayout.EndScrollView();
                 GUILayout.EndVertical();
             }
@@ -130,19 +107,20 @@ namespace AwtterSDK.Editor.Pages
                     foreach (var dlc in AwtterSdkInstaller.AvaliableDlcs.Where(x => !x.IsInstalled))
                     {
                         GUILayout.BeginHorizontal();
-                        GUILayout.Box(TextureCache.GetTextureOrDownload(dlc.Icon), GUILayout.Height(32), GUILayout.Width(32));
+                        GUILayout.Box(TextureCache.GetTextureOrDownload(dlc.Icon), GUILayout.Height(32),
+                            GUILayout.Width(32));
                         GUI.color = dlc.Install ? Color.green : Color.white;
-                        if (GUILayout.Button(dlc.Name, CustomButton, GUILayout.Height(32)))
-                        {
-                            dlc.Install = !dlc.Install;
-                        }
+                        if (GUILayout.Button(dlc.Name, CustomButton, GUILayout.Height(32))) dlc.Install = !dlc.Install;
                         GUI.color = Color.white;
                         GUILayout.EndHorizontal();
                     }
+
                     GUILayout.EndScrollView();
                 }
+
                 GUILayout.EndVertical();
             }
+
             GUILayout.Space(15f);
 
             if (GUILayout.Button("▶   Run SDK Installer", _main.Shared.WindowCustomButton3, GUILayout.MinHeight(27)))
@@ -153,13 +131,14 @@ namespace AwtterSDK.Editor.Pages
             GUILayout.Space(15f);
 
             InstallStatus = GUILayout.BeginScrollView(InstallStatus, false, true);
-            bool anythingToShow = false;
+            var anythingToShow = false;
 
             if (AwtterSdkInstaller.CurrentBase != null)
             {
                 Utils.CreateBox("Base Model");
                 GUILayout.BeginHorizontal();
-                GUILayout.Box(TextureCache.GetTextureOrDownload(AwtterSdkInstaller.CurrentBase.Icon), GUILayout.Height(32), GUILayout.Width(32));
+                GUILayout.Box(TextureCache.GetTextureOrDownload(AwtterSdkInstaller.CurrentBase.Icon),
+                    GUILayout.Height(32), GUILayout.Width(32));
                 GUILayout.Label(AwtterSdkInstaller.CurrentBase.Name, CustomLabel, GUILayout.Height(32));
                 GUILayout.EndHorizontal();
                 anythingToShow = true;
@@ -172,11 +151,13 @@ namespace AwtterSDK.Editor.Pages
                 foreach (var dlc in AwtterSdkInstaller.AvaliableDlcs.Where(x => x.Install))
                 {
                     GUILayout.BeginHorizontal();
-                    GUILayout.Box(TextureCache.GetTextureOrDownload(dlc.Icon), GUILayout.Height(32), GUILayout.Width(32));
+                    GUILayout.Box(TextureCache.GetTextureOrDownload(dlc.Icon), GUILayout.Height(32),
+                        GUILayout.Width(32));
                     GUILayout.Label(dlc.Name, CustomLabel, GUILayout.Height(32));
                     GUILayout.EndHorizontal();
                     GUILayout.Space(15);
                 }
+
                 anythingToShow = true;
             }
 
@@ -187,11 +168,13 @@ namespace AwtterSDK.Editor.Pages
                 foreach (var file in PackagesToInstall)
                 {
                     GUILayout.BeginHorizontal();
-                    GUILayout.Box(TextureCache.GetTextureOrDownload(file.Icon), GUILayout.Height(32), GUILayout.Width(32));
+                    GUILayout.Box(TextureCache.GetTextureOrDownload(file.Icon), GUILayout.Height(32),
+                        GUILayout.Width(32));
                     GUILayout.Label(file.Name, CustomLabel, GUILayout.Height(32));
                     GUILayout.EndHorizontal();
                     GUILayout.Space(15);
                 }
+
                 anythingToShow = true;
             }
 
@@ -202,156 +185,178 @@ namespace AwtterSDK.Editor.Pages
             GUILayout.EndScrollView();
         }
 
-      /*  public IEnumerator InstallationProcess()
-        {
+        /*  public IEnumerator InstallationProcess()
+          {
 
 
-            int currentPackage = 1;
-            foreach (var vrcFile in AwtterSdkInstaller.VrcFilesToInstall)
-            {
-                using (var www = UnityWebRequest.Get(vrcFile.Url))
-                {
-                    AsyncOperation request = www.SendWebRequest();
+              int currentPackage = 1;
+              foreach (var vrcFile in AwtterSdkInstaller.VrcFilesToInstall)
+              {
+                  using (var www = UnityWebRequest.Get(vrcFile.Url))
+                  {
+                      AsyncOperation request = www.SendWebRequest();
 
-                    while (!request.isDone)
-                    {
-                        EditorUtility.DisplayProgressBar($"Downloading VRC Packages ( {currentPackage}/{AwtterSdkInstaller.VrcFilesToInstall.Count} )", vrcFile.DisplayName, www.downloadProgress);
-                    }
+                      while (!request.isDone)
+                      {
+                          EditorUtility.DisplayProgressBar($"Downloading VRC Packages ( {currentPackage}/{AwtterSdkInstaller.VrcFilesToInstall.Count} )", vrcFile.DisplayName, www.downloadProgress);
+                      }
 
-                    switch (www.responseCode)
-                    {
-                        case 200:
-                            File.WriteAllBytes(Path.Combine(packagesFolder, $"{vrcFile.Name}.zip"), www.downloadHandler.data);
+                      switch (www.responseCode)
+                      {
+                          case 200:
+                              File.WriteAllBytes(Path.Combine(packagesFolder, $"{vrcFile.Name}.zip"), www.downloadHandler.data);
 
-                            zip.ExtractZip(Path.Combine(packagesFolder, $"{vrcFile.Name}.zip"), Path.Combine(packagesFolder, vrcFile.Name), null);
+                              zip.ExtractZip(Path.Combine(packagesFolder, $"{vrcFile.Name}.zip"), Path.Combine(packagesFolder, vrcFile.Name), null);
 
-                            File.Delete(Path.Combine(packagesFolder, $"{vrcFile.Name}.zip"));
-                            break;
-                        default:
-                            Debug.LogError($"[<color=orange>Awtter SDK</color>] Failed downloading vrchat package {vrcFile.Name}, responseCode {www.responseCode}, message {www.downloadHandler.text}");
-                            break;
-                    }
-                    EditorUtility.ClearProgressBar();
-                }
-                currentPackage++;
-            }
+                              File.Delete(Path.Combine(packagesFolder, $"{vrcFile.Name}.zip"));
+                              break;
+                          default:
+                              Debug.LogError($"[<color=orange>Awtter SDK</color>] Failed downloading vrchat package {vrcFile.Name}, responseCode {www.responseCode}, message {www.downloadHandler.text}");
+                              break;
+                      }
+                      EditorUtility.ClearProgressBar();
+                  }
+                  currentPackage++;
+              }
 
-            currentPackage = 1;
-            foreach (var package in PackagesToInstall)
-            {
-                bool poi = false;
-                if (package.InstallStatus is PoyomiInstallation d)
-                {
-                    package.Url = $"";
-                    poi = true;
-                }
+              currentPackage = 1;
+              foreach (var package in PackagesToInstall)
+              {
+                  bool poi = false;
+                  if (package.InstallStatus is PoyomiInstallation d)
+                  {
+                      package.Url = $"";
+                      poi = true;
+                  }
 
-                using (var www = UnityWebRequest.Get(package.Url))
-                {
-                    if (poi)
-                        www.SetRequestHeader("Authorization", $"Token {TokenCache.Token}");
+                  using (var www = UnityWebRequest.Get(package.Url))
+                  {
+                      if (poi)
+                          www.SetRequestHeader("Authorization", $"Token {TokenCache.Token}");
 
-                    AsyncOperation request = www.SendWebRequest();
+                      AsyncOperation request = www.SendWebRequest();
 
-                    while (!request.isDone)
-                    {
-                        EditorUtility.DisplayProgressBar($"Downloading Unity Packages ( {currentPackage}/{AwtterSdkInstaller.UnityPackages.Count} )", package.Name, www.downloadProgress);
-                    }
+                      while (!request.isDone)
+                      {
+                          EditorUtility.DisplayProgressBar($"Downloading Unity Packages ( {currentPackage}/{AwtterSdkInstaller.UnityPackages.Count} )", package.Name, www.downloadProgress);
+                      }
 
-                    switch (www.responseCode)
-                    {
-                        case 200:
+                      switch (www.responseCode)
+                      {
+                          case 200:
 
-                            break;
-                        default:
-                            Debug.LogError($"[<color=orange>Awtter SDK</color>] Failed downloading unity package {package.Name}, responseCode {www.responseCode}, message {www.downloadHandler.text}");
-                            break;
-                    }
-                    EditorUtility.ClearProgressBar();
-                }
-                currentPackage++;
-            }
+                              break;
+                          default:
+                              Debug.LogError($"[<color=orange>Awtter SDK</color>] Failed downloading unity package {package.Name}, responseCode {www.responseCode}, message {www.downloadHandler.text}");
+                              break;
+                      }
+                      EditorUtility.ClearProgressBar();
+                  }
+                  currentPackage++;
+              }
 
-            if (!AwtterSdkInstaller.IsBaseIntalled && AwtterSdkInstaller.CurrentBase != null)
-            {
-                using (var www = UnityWebRequest.Get(AwtterSdkInstaller.CurrentBase.DownloadUrl))
-                {
-                    www.SetRequestHeader("Authorization", $"Token {TokenCache.Token}");
+              if (!AwtterSdkInstaller.IsBaseIntalled && AwtterSdkInstaller.CurrentBase != null)
+              {
+                  using (var www = UnityWebRequest.Get(AwtterSdkInstaller.CurrentBase.DownloadUrl))
+                  {
+                      www.SetRequestHeader("Authorization", $"Token {TokenCache.Token}");
 
-                    AsyncOperation request = www.SendWebRequest();
+                      AsyncOperation request = www.SendWebRequest();
 
-                    while (!request.isDone)
-                    {
-                        EditorUtility.DisplayProgressBar($"Downloading Base Model", AwtterSdkInstaller.CurrentBase.Name, www.downloadProgress);
-                    }
+                      while (!request.isDone)
+                      {
+                          EditorUtility.DisplayProgressBar($"Downloading Base Model", AwtterSdkInstaller.CurrentBase.Name, www.downloadProgress);
+                      }
 
-                    switch (www.responseCode)
-                    {
-                        case 200:
-                            string fileName = "BaseModel.unitypackage";
+                      switch (www.responseCode)
+                      {
+                          case 200:
+                              string fileName = "BaseModel.unitypackage";
 
-                            File.WriteAllBytes(Path.Combine(Application.dataPath, fileName), www.downloadHandler.data);
+                              File.WriteAllBytes(Path.Combine(Application.dataPath, fileName), www.downloadHandler.data);
 
-                            AssetDatabase.ImportPackage(Path.Combine(Application.dataPath, fileName), false);
-                            File.Delete(Path.Combine(Application.dataPath, fileName));
+                              AssetDatabase.ImportPackage(Path.Combine(Application.dataPath, fileName), false);
+                              File.Delete(Path.Combine(Application.dataPath, fileName));
 
-                            AwtterSdkInstaller.InstalledPackages.BaseModel = new InstalledPackageModel()
-                            {
-                                Id = AwtterSdkInstaller.CurrentBase.Id,
-                                Version = AwtterSdkInstaller.CurrentBase.Version
-                            };
-                            break;
-                        default:
-                            Debug.LogError($"[<color=orange>Awtter SDK</color>] Failed downloading model base {AwtterSdkInstaller.CurrentBase.Name}, responseCode {www.responseCode}, message {www.downloadHandler.text}");
-                            break;
-                    }
-                    EditorUtility.ClearProgressBar();
-                }
-            }
+                              AwtterSdkInstaller.InstalledPackages.BaseModel = new InstalledPackageModel()
+                              {
+                                  Id = AwtterSdkInstaller.CurrentBase.Id,
+                                  Version = AwtterSdkInstaller.CurrentBase.Version
+                              };
+                              break;
+                          default:
+                              Debug.LogError($"[<color=orange>Awtter SDK</color>] Failed downloading model base {AwtterSdkInstaller.CurrentBase.Name}, responseCode {www.responseCode}, message {www.downloadHandler.text}");
+                              break;
+                      }
+                      EditorUtility.ClearProgressBar();
+                  }
+              }
 
-            currentPackage = 1;
-            foreach (var dlc in SelectedDlcs)
-            {
-                using (var www = UnityWebRequest.Get(dlc.DownloadUrl))
-                {
-                    www.SetRequestHeader("Authorization", $"Token {TokenCache.Token}");
+              currentPackage = 1;
+              foreach (var dlc in SelectedDlcs)
+              {
+                  using (var www = UnityWebRequest.Get(dlc.DownloadUrl))
+                  {
+                      www.SetRequestHeader("Authorization", $"Token {TokenCache.Token}");
 
-                    AsyncOperation request = www.SendWebRequest();
+                      AsyncOperation request = www.SendWebRequest();
 
-                    while (!request.isDone)
-                    {
-                        EditorUtility.DisplayProgressBar($"Downloading Dlcs ( {currentPackage}/{SelectedDlcs.Count} )", dlc.Name, www.downloadProgress);
-                    }
+                      while (!request.isDone)
+                      {
+                          EditorUtility.DisplayProgressBar($"Downloading Dlcs ( {currentPackage}/{SelectedDlcs.Count} )", dlc.Name, www.downloadProgress);
+                      }
 
-                    switch (www.responseCode)
-                    {
-                        case 200:
-                            string fileName = $"Dlc{dlc.Id}.unitypackage";
+                      switch (www.responseCode)
+                      {
+                          case 200:
+                              string fileName = $"Dlc{dlc.Id}.unitypackage";
 
-                            File.WriteAllBytes(Path.Combine(Application.dataPath, fileName), www.downloadHandler.data);
+                              File.WriteAllBytes(Path.Combine(Application.dataPath, fileName), www.downloadHandler.data);
 
-                            AssetDatabase.ImportPackage(Path.Combine(Application.dataPath, fileName), false);
-                            File.Delete(Path.Combine(Application.dataPath, fileName));
+                              AssetDatabase.ImportPackage(Path.Combine(Application.dataPath, fileName), false);
+                              File.Delete(Path.Combine(Application.dataPath, fileName));
 
 
-                            break;
-                        default:
-                            Debug.LogError($"[<color=orange>Awtter SDK</color>] Failed downloading dlc {dlc.Name}, responseCode {www.responseCode}, message {www.downloadHandler.text}");
-                            break;
-                    }
+                              break;
+                          default:
+                              Debug.LogError($"[<color=orange>Awtter SDK</color>] Failed downloading dlc {dlc.Name}, responseCode {www.responseCode}, message {www.downloadHandler.text}");
+                              break;
+                      }
 
-                    EditorUtility.ClearProgressBar();
-                }
-            }
+                      EditorUtility.ClearProgressBar();
+                  }
+              }
 
-            _main.SaveInstalledPackagesStorage();
-            _main.UpdateAwtterPackages();
-            IsInstalling = false;
-            yield break;
-        }*/
+              _main.SaveInstalledPackagesStorage();
+              _main.UpdateAwtterPackages();
+              IsInstalling = false;
+              yield break;
+          }*/
 
         public void Reset()
         {
+        }
+
+        private void RefreshDlcs()
+        {
+            foreach (var dlc in AwtterSdkInstaller.AvaliableDlcs)
+                dlc.Install = false;
+        }
+
+        private void CheckChanges()
+        {
+            if (AwtterSdkInstaller.Products == null) return;
+
+            RefreshDlcs();
+
+            PackagesToInstall.Clear();
+
+            foreach (var package in AwtterSdkInstaller.UnityPackages)
+            {
+                package.InstallStatus.Check();
+                if (!package.InstallStatus.IsInstalled)
+                    PackagesToInstall.Add(package);
+            }
         }
     }
 }

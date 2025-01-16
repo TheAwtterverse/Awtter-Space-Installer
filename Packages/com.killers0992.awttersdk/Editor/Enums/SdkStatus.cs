@@ -8,6 +8,7 @@ namespace AwtterSDK.Editor.Enums
         None,
         NotLoggedIn,
         PatreonItems,
+        MarketplacePackages,
         TosNotAccepted,
         InstallInProgress,
         BaseInstalled,
@@ -16,6 +17,6 @@ namespace AwtterSDK.Editor.Enums
         ViewScenes,
         ViewSettings,
         ManagePackages,
-        ResetPage,
+        ResetPage
     }
 }

@@ -7,7 +7,7 @@ namespace AwtterSDK.Editor.Models
     {
         public int Id { get; set; }
         public string Version { get; set; }
-        [JsonIgnore]
-        public FileModel File { get; set; }
+
+        [JsonIgnore] public FileModel File { get; set; }
     }
 }

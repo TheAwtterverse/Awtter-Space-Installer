@@ -12,6 +12,7 @@ namespace AwtterSDK.Editor.Models
         public string Icon { get; set; }
         public bool IsBaseModel { get; set; }
         public bool IsDLC { get; set; }
+        public bool IsMarketplace { get; set; }
         public bool IsUnityPackage { get; set; } = true;
         public bool RequiresAuth { get; set; }
         public string DownloadUrl { get; set; }

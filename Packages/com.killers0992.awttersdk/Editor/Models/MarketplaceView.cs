@@ -1,22 +1,25 @@
 ﻿using System;
+using AwtterSDK.Editor.Models.API;
 
 namespace AwtterSDK.Editor.Models
 {
-    public class BaseView
+    public class MarketplaceView
     {
         private Version _currentVersion;
 
         private Version _newVersion;
         public int Id { get; set; }
         public int ProductId { get; set; }
-        public string BaseName { get; set; }
         public string Icon { get; set; }
         public string Name { get; set; }
         public string Version { get; set; }
         public string InstalledVersion { get; set; }
         public string DownloadUrl { get; set; }
-        public bool IsPatreon { get; set; }
         public bool IsMarketplace { get; set; }
+        public CategoryModel Category { get; set; }
+
+        public bool IsInstalled => AwtterSdkInstaller.InstalledPackages != null &&
+                                   AwtterSdkInstaller.InstalledPackages.Marketplace.ContainsKey(Id);
 
         public bool IsOutdated
         {
@@ -28,10 +31,10 @@ namespace AwtterSDK.Editor.Models
                 if (_currentVersion == null && !System.Version.TryParse(InstalledVersion, out _currentVersion))
                     return false;
 
-                return _newVersion.CompareTo(_currentVersion) > 0;
+                return _currentVersion.CompareTo(_newVersion) > 0;
             }
         }
 
-        public bool IsInstalled => AwtterSdkInstaller.InstalledPackages?.BaseModel?.Id == Id;
+        public bool Install { get; set; }
     }
 }

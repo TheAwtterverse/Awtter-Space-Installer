@@ -1,21 +1,24 @@
-﻿namespace AwtterSDK.Editor.Models.API
-{
-    using System.Collections.Generic;
-    using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
+namespace AwtterSDK.Editor.Models.API
+{
     public class ProductModel
     {
         private int? _id;
+
         public int Id
         {
             get
             {
                 if (!_id.HasValue)
                 {
-                    string splitId = Path.Split('/').Last();
+                    var splitId = Path.Split('/').Last();
 
-                    if (int.TryParse(splitId, out int id))
+                    if (int.TryParse(splitId, out var id))
                         _id = id;
+                    else
+                        _id = 0;
                 }
 
                 return _id.Value;
@@ -24,9 +27,12 @@
 
         public string Path { get; set; }
         public string Name { get; set; }
+        public CategoryModel Category { get; set; }
         public string BaseName { get; set; }
         public bool IsBaseModel { get; set; }
         public string Icon { get; set; }
+
+        public List<FileModel> Files { get; set; }
 
         public FileModel IsInstalled(bool findBase = false)
         {
@@ -34,11 +40,11 @@
 
             if (vrcPackage == null) return null;
 
-            foreach(var file in Files)
+            foreach (var file in Files)
             {
-                string id = file.Path.Split('/')[5];
+                var id = file.Path.Split('/')[5];
 
-                if (!int.TryParse(id, out int fileId)) continue;
+                if (!int.TryParse(id, out var fileId)) continue;
 
                 if (AwtterSdkInstaller.InstalledPackages.BaseModel != null &&
                     AwtterSdkInstaller.InstalledPackages.BaseModel.Id == fileId && findBase)
@@ -49,7 +55,5 @@
 
             return null;
         }
-
-        public List<FileModel> Files { get; set; }
     }
 }

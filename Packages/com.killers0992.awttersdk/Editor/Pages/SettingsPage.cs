@@ -1,11 +1,5 @@
-﻿using AwtterSDK;
+﻿using System.IO;
 using AwtterSDK.Editor.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 
@@ -13,11 +7,11 @@ namespace AwtterSDK.Editor.Pages
 {
     public class SettingsPage : IPage
     {
-        private long _directorySize = 0;
+        private long _directorySize;
 
         public void Load(AwtterSdkInstaller main)
         {
-            _directorySize = Utils.DirectorySize(new System.IO.DirectoryInfo(FilesCache.CachePath));
+            _directorySize = Utils.DirectorySize(new DirectoryInfo(FilesCache.CachePath));
         }
 
         public void DrawGUI(Rect pos)
@@ -28,19 +22,14 @@ namespace AwtterSDK.Editor.Pages
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Clear cache"))
             {
-                foreach(var file in Directory.GetFiles(FilesCache.CachePath))
-                {
-                    File.Delete(file);
-                }
+                foreach (var file in Directory.GetFiles(FilesCache.CachePath)) File.Delete(file);
                 Load(null);
             }
+
             EditorGUILayout.EndHorizontal();
             GUILayout.FlexibleSpace();
             EditorGUILayout.BeginVertical();
-            if (GUILayout.Button($"Go back"))
-            {
-                AwtterSdkInstaller.ViewSettings = false;
-            }
+            if (GUILayout.Button("Go back")) AwtterSdkInstaller.ViewSettings = false;
             EditorGUILayout.EndVertical();
         }
 

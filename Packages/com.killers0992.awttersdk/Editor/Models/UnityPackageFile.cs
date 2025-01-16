@@ -1,7 +1,7 @@
-﻿namespace AwtterSDK.Editor.Models
-{
-    using AwtterSDK.Editor.Interfaces;
+﻿using AwtterSDK.Editor.Interfaces;
 
+namespace AwtterSDK.Editor.Models
+{
     public class UnityPackageFile
     {
         public int Id { get; set; }

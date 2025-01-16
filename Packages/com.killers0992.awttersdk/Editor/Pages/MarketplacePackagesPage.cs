@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace AwtterSDK.Editor.Pages
 {
-    public class PatreonBenefitsPage : IPage
+    public class MarketplacePackagesPage : IPage
     {
         private Texture2D _awtterInboxImage;
         private AwtterSdkInstaller _main;
@@ -46,25 +46,15 @@ namespace AwtterSDK.Editor.Pages
         public void DrawGUI(Rect pos)
         {
             GUILayout.Space(15);
-            Utils.CreateBox("Patreon items");
+            Utils.CreateBox("Marketplace items");
             GUILayout.Space(15);
 
-            if (AwtterSdkInstaller.Patreon == null || !AwtterSdkInstaller.Patreon.Active)
-            {
-                Utils.CreateBox("Looks like there's nothing here, are you a Patreon ?");
-                if (AwtterInboxImage != null)
-                    GUI.DrawTexture(new Rect(0, 360, pos.size.x, 180), AwtterInboxImage, ScaleMode.ScaleToFit);
-                GUILayout.Space(238);
-                End();
-                return;
-            }
-
             Scroll = GUILayout.BeginScrollView(Scroll);
-            if (AwtterSdkInstaller.AvaliableBases.Any(x => x.IsPatreon))
+            if (AwtterSdkInstaller.AvaliableBases.Any(x => x.IsMarketplace))
             {
                 Utils.CreateBox("BASES");
                 GUILayout.Space(5);
-                foreach (var baseModel in AwtterSdkInstaller.AvaliableBases.Where(x => x.IsPatreon))
+                foreach (var baseModel in AwtterSdkInstaller.AvaliableBases.Where(x => x.IsMarketplace))
                 {
                     GUILayout.BeginHorizontal();
                     GUILayout.Box(TextureCache.GetTextureOrDownload(baseModel.Icon), GUILayout.Height(32),
@@ -84,35 +74,26 @@ namespace AwtterSDK.Editor.Pages
                 GUILayout.Space(5);
             }
 
-            if (AwtterSdkInstaller.AvaliableDlcs.Any(x => !x.IsProp && x.IsDlc && x.IsPatreon))
+            if (AwtterSdkInstaller.AvaliableMarketplaceItems.Any())
             {
-                Utils.CreateBox("DLCS");
-                GUILayout.Space(5);
-                foreach (var dlc in AwtterSdkInstaller.AvaliableDlcs.Where(x => x.IsDlc && x.IsPatreon))
+                string currentCategory = null;
+
+                foreach (var dlc in AwtterSdkInstaller.AvaliableMarketplaceItems.OrderBy(y => y.Category.Priority)
+                             .ThenBy(z => z.Category.Name))
                 {
+                    if (dlc.Category.Name != currentCategory)
+                    {
+                        currentCategory = dlc.Category.Name;
+
+                        Utils.CreateBox(currentCategory.ToUpper());
+                        GUILayout.Space(5);
+                    }
+
                     GUILayout.BeginHorizontal();
                     GUILayout.Box(TextureCache.GetTextureOrDownload(dlc.Icon), GUILayout.Height(32),
                         GUILayout.Width(32));
                     GUI.color = dlc.Install ? Color.green : Color.white;
                     if (GUILayout.Button(dlc.Name, CustomButton, GUILayout.Height(32))) dlc.Install = !dlc.Install;
-                    GUI.color = Color.white;
-                    GUILayout.EndHorizontal();
-                }
-
-                GUILayout.Space(5);
-            }
-
-            if (AwtterSdkInstaller.AvaliableDlcs.Any(x => x.IsProp && x.IsPatreon))
-            {
-                Utils.CreateBox("Props");
-                GUILayout.Space(5);
-                foreach (var prop in AwtterSdkInstaller.AvaliableDlcs.Where(x => x.IsProp && x.IsPatreon))
-                {
-                    GUILayout.BeginHorizontal();
-                    GUILayout.Box(TextureCache.GetTextureOrDownload(prop.Icon), GUILayout.Height(32),
-                        GUILayout.Width(32));
-                    GUI.color = prop.Install ? Color.green : Color.white;
-                    if (GUILayout.Button(prop.Name, CustomButton, GUILayout.Height(32))) prop.Install = !prop.Install;
                     GUI.color = Color.white;
                     GUILayout.EndHorizontal();
                 }
@@ -135,7 +116,7 @@ namespace AwtterSDK.Editor.Pages
             GUILayout.BeginHorizontal();
             GUI.color = Color.red;
             if (GUILayout.Button("Go back", _main.Shared.WindowCustomButton3, GUILayout.MinHeight(27)))
-                AwtterSdkInstaller.ViewPatreonItems = false;
+                AwtterSdkInstaller.ViewMarketplacePackages = false;
             GUI.color = Color.white;
 
             GUILayout.Space(10);

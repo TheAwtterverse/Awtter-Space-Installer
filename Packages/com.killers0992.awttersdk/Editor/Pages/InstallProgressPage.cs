@@ -1,12 +1,14 @@
-﻿using AwtterSDK.Editor.Interfaces;
-using AwtterSDK.Editor.Models;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using AwtterSDK.Editor.Interfaces;
+using AwtterSDK.Editor.Models;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
+using Debug = UnityEngine.Debug;
 
 namespace AwtterSDK.Editor.Pages
 {
@@ -38,19 +40,41 @@ namespace AwtterSDK.Editor.Pages
                 GUILayout.Box(TextureCache.GetTextureOrDownload(file.Icon), GUILayout.Height(45), GUILayout.Width(45));
                 GUILayout.Label(file.Displayname, CustomLabel, GUILayout.Height(32));
                 GUILayout.EndHorizontal();
-                Rect myRect = GUILayoutUtility.GetLastRect();
+                var myRect = GUILayoutUtility.GetLastRect();
                 GUI.color = file.DownloadStatusColor;
-                EditorGUI.ProgressBar(new Rect(myRect.x, myRect.y + 32f, myRect.width, 16f), file.DownloadProgress, String.Format("{0:P2}", file.DownloadProgress));
+                EditorGUI.ProgressBar(new Rect(myRect.x, myRect.y + 32f, myRect.width, 16f), file.DownloadProgress,
+                    string.Format("{0:P2}", file.DownloadProgress));
                 GUI.color = Color.white;
                 GUILayout.Space(30);
             }
+
             GUILayout.EndScrollView();
             GUILayout.Space(7);
             EditorGUILayout.HelpBox("Wait until installing finishes!", MessageType.Warning);
         }
 
+        public void Reset()
+        {
+            _progressScroll = Vector2.zero;
+        }
+
         private bool Download(int index, int maximumIndex, FileToInstallModel file)
         {
+            if (file.Name == "VRCFury")
+            {
+                try
+                {
+                    Process.Start(file.DownloadUrl);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(
+                        $"[<color=orange>Awtter SDK</color>] Failed running {file.Displayname}, message {e.Message}");
+                }
+
+                return true;
+            }
+
             using (var www = UnityWebRequest.Get(file.DownloadUrl))
             {
                 if (file.RequiresAuth)
@@ -59,9 +83,8 @@ namespace AwtterSDK.Editor.Pages
                 AsyncOperation request = www.SendWebRequest();
 
                 while (!request.isDone)
-                {
-                    EditorUtility.DisplayProgressBar($"Downloading packages", $"Downloading {file.Displayname} {index}/{maximumIndex}", request.progress);
-                }
+                    EditorUtility.DisplayProgressBar("Downloading packages",
+                        $"Downloading {file.Displayname} {index}/{maximumIndex}", request.progress);
 
                 switch (www.responseCode)
                 {
@@ -69,16 +92,18 @@ namespace AwtterSDK.Editor.Pages
                         FilesCache.CacheFile(file, www.downloadHandler.data);
                         return true;
                     default:
-                        Debug.LogError($"[<color=orange>Awtter SDK</color>] Failed downloading {file.Displayname}, responseCode {www.responseCode}, message {www.downloadHandler.text}");
+                        Debug.LogError(
+                            $"[<color=orange>Awtter SDK</color>] Failed downloading {file.Displayname}, responseCode {www.responseCode}, message {www.downloadHandler.text}");
                         break;
                 }
             }
+
             return false;
         }
 
         private IEnumerator DownloadFile(List<FileToInstallModel> files)
         {
-            for(int x =0; x < files.Count; x++)
+            for (var x = 0; x < files.Count; x++)
             {
                 var file = files[x];
 
@@ -90,31 +115,37 @@ namespace AwtterSDK.Editor.Pages
 
                 if (file.IsBaseModel)
                 {
-                    AwtterSdkInstaller.InstalledPackages.BaseModel = new InstalledPackageModel()
+                    AwtterSdkInstaller.InstalledPackages.BaseModel = new InstalledPackageModel
                     {
                         Id = file.Id,
                         Version = file.Version
                     };
                 }
+                else if (file.IsMarketplace)
+                {
+                    if (AwtterSdkInstaller.InstalledPackages.Marketplace.ContainsKey(file.Id)) break;
+
+                    AwtterSdkInstaller.InstalledPackages.Marketplace.Add(file.Id, new InstalledPackageModel
+                    {
+                        Id = file.Id,
+                        Version = file.Version
+                    });
+                }
                 else if (file.IsDLC)
                 {
                     if (AwtterSdkInstaller.InstalledPackages.Dlcs.ContainsKey(file.Id)) break;
 
-                    AwtterSdkInstaller.InstalledPackages.Dlcs.Add(file.Id, new InstalledPackageModel()
+                    AwtterSdkInstaller.InstalledPackages.Dlcs.Add(file.Id, new InstalledPackageModel
                     {
                         Id = file.Id,
                         Version = file.Version
                     });
                 }
             }
+
             EditorUtility.ClearProgressBar();
             AwtterSdkInstaller.IsInstalling = false;
             yield break;
-        }
-
-        public void Reset()
-        {
-            _progressScroll = Vector2.zero;
         }
     }
 }

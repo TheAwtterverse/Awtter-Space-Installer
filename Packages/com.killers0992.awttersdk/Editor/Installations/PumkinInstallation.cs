@@ -1,31 +1,24 @@
-﻿using AwtterSDK.Editor.Interfaces;
+﻿using System;
+using System.IO;
+using AwtterSDK.Editor.Interfaces;
 using AwtterSDK.Editor.Models;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using UnityEngine;
 
 namespace AwtterSDK.Editor.Installations
 {
     public class PumkinInstallation : ICheckInstallStatus
     {
-        bool _isInstalled;
-        Version _version;
+        private Version _version;
 
-        public bool IsInstalled => _isInstalled;
+        public bool IsInstalled { get; private set; }
 
         public Version InstalledVersion => _version;
 
         public void Check()
         {
-            _isInstalled = Directory.Exists("Assets/PumkinsAvatarTools");
+            IsInstalled = Directory.Exists("Assets/PumkinsAvatarTools");
 
-            if (_isInstalled)
+            if (IsInstalled)
             {
                 var targetFile = "Assets/PumkinsAvatarTools/thry_module_manifest.json";
 
