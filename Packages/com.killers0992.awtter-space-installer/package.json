@@ -1,7 +1,7 @@
 {
   "name": "com.killers0992.awtter-space-installer",
   "displayName": "Awtter Space Installer",
-  "version": "1.2.40",
+  "version": "1.2.41",
   "description": "Tool for managing content from AwtterSpace.",
   "unity": "2019.4",
   "vpmDependencies": {
